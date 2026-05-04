@@ -1,0 +1,11 @@
+name = "pj-base"
+version = "0.1.0"
+
+# Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
+# `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
+# CLI-specific extras.
+
+[[file]]
+src = "LICENSE"
+how = "overwrite"
+when = "once"
