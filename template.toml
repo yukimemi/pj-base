@@ -45,8 +45,11 @@ marker = { begin = "# kata:gitignore:base:begin", end = "# kata:gitignore:base:e
 # APM consumer config. Tera-rendered so `name:` matches the
 # project's directory name. Static otherwise — the only reason
 # yukimemi/* projects ship apm.yml is to vendor the renri skill.
+# `dst` is spelled out even though kata's `.tera` opt-in
+# convention would derive the same name; explicit reads better.
 [[file]]
 src = "apm.yml.tera"
+dst = "apm.yml"
 how = "overwrite"
 when = "always"
 
