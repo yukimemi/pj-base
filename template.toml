@@ -32,6 +32,12 @@ src = "GEMINI.md"
 how = "overwrite"
 when = "always"
 
+# opencode shim — same thin wrapper pointing back to AGENTS.md.
+[[file]]
+src = "OPENCODE.md"
+how = "overwrite"
+when = "always"
+
 # Common .gitignore patterns. Kept inside a marker block so each
 # project can append its own `.gitignore` lines outside the block
 # without `kata apply` clobbering them.
@@ -64,5 +70,25 @@ when = "always"
 [[file]]
 src = "renri.toml.base"
 dst = "renri.toml"
+how = "overwrite"
+when = "always"
+
+# Gemini CLI settings — grant access to ~/wt so that worktrees
+# created by renri (which live under ~/wt) are reachable by the
+# Gemini agent. Applied as a project-level settings file so every
+# yukimemi/* project automatically inherits the permission.
+[[file]]
+src = ".gemini/settings.json"
+dst = ".gemini/settings.json"
+how = "overwrite"
+when = "always"
+
+# opencode settings — same rationale as Gemini above: allow the
+# agent to read/write files inside renri worktrees under ~/wt.
+# Uses `permission.external_directory` (opencode's mechanism),
+# written as project-level `opencode.json`.
+[[file]]
+src = "opencode.json"
+dst = "opencode.json"
 how = "overwrite"
 when = "always"
