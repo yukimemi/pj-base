@@ -53,11 +53,24 @@ marker = { begin = "# kata:gitignore:base:begin", end = "# kata:gitignore:base:e
 # yukimemi/* projects ship apm.yml is to vendor the renri skill.
 # `dst` is spelled out even though kata's `.tera` opt-in
 # convention would derive the same name; explicit reads better.
+#
+# `when = "once"` — first apply writes the consumer-default form,
+# subsequent applies honour `once_applied = true` in
+# `.kata/applied.toml` and skip. This lets *publisher* repos
+# (yukimemi/renri being the canonical example) keep a hand-edited
+# `apm.yml` with a real `version` and an empty
+# `dependencies.apm: []` after one of two routes:
+#   (a) restore the publisher form post-init and rely on
+#       `once_applied = true` to keep it stable, or
+#   (b) skip the bootstrap apm.yml on a fresh init for
+#       publishers (workflow-side decision).
+# Consumers who want to pick up future apm.yml.tera enhancements
+# can `rm apm.yml && kata apply` to retrigger the once-write.
 [[file]]
 src = "apm.yml.tera"
 dst = "apm.yml"
 how = "overwrite"
-when = "always"
+when = "once"
 
 # renri worktree config. Language-agnostic baseline: a single
 # post_create hook that runs `apm install --update` so every
