@@ -58,7 +58,11 @@ when = "always"
 # fresh worktree picks up the latest renri skill. Language layers
 # (pj-rust, pj-go, pj-bun) overwrite this file with a richer
 # hook that delegates to their build-system's on-add task.
+# Source name carries the `.base` suffix for symmetry with
+# `AGENTS.md.base` / `.gitignore.base` — same convention: layer
+# suffix on every src that participates in compose conflicts.
 [[file]]
-src = "renri.toml"
+src = "renri.toml.base"
+dst = "renri.toml"
 how = "overwrite"
 when = "always"
