@@ -1,0 +1,7 @@
+# Editor / OS noise — kata-managed (yukimemi/pj-base).
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
