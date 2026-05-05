@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.1.0"
+version = "0.2.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -9,3 +9,53 @@ version = "0.1.0"
 src = "LICENSE"
 how = "overwrite"
 when = "once"
+
+# Agent guidance — `AGENTS.md` is the agent-agnostic source of
+# truth (Codex reads it directly), `CLAUDE.md` / `GEMINI.md` are
+# thin shims that auto-load tools still find. The base layer is
+# the language-agnostic conventions block; pj-rust / pj-rust-cli
+# add their own marker-bracketed sections in the same file.
+[[file]]
+src = "AGENTS.md.base"
+dst = "AGENTS.md"
+how = "merge-section"
+when = "always"
+marker = { begin = "<!-- kata:agents:base:begin -->", end = "<!-- kata:agents:base:end -->" }
+
+[[file]]
+src = "CLAUDE.md"
+how = "overwrite"
+when = "always"
+
+[[file]]
+src = "GEMINI.md"
+how = "overwrite"
+when = "always"
+
+# Common .gitignore patterns. Kept inside a marker block so each
+# project can append its own `.gitignore` lines outside the block
+# without `kata apply` clobbering them.
+[[file]]
+src = ".gitignore.base"
+dst = ".gitignore"
+how = "merge-section"
+when = "always"
+marker = { begin = "# kata:gitignore:base:begin", end = "# kata:gitignore:base:end" }
+
+# APM consumer config. Tera-rendered so `name:` matches the
+# project's directory name. Static otherwise — the only reason
+# yukimemi/* projects ship apm.yml is to vendor the renri skill.
+[[file]]
+src = "apm.yml.tera"
+how = "overwrite"
+when = "always"
+
+# renri worktree config. Language-agnostic baseline: a single
+# post_create hook that runs `apm install --update` so every
+# fresh worktree picks up the latest renri skill. Language layers
+# (pj-rust, pj-go, pj-bun) overwrite this file with a richer
+# hook that delegates to their build-system's on-add task.
+[[file]]
+src = "renri.toml"
+how = "overwrite"
+when = "always"

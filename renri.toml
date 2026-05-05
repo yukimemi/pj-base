@@ -1,0 +1,10 @@
+# renri.toml — language-agnostic worktree config for yukimemi/* projects.
+# pj-base ships the minimum hook chain that any PJ benefits from
+# (refresh installed agent skills); language-specific layers
+# (pj-rust, pj-go, pj-bun) overwrite this file with a richer hook
+# that delegates to the project's build-system on-add task.
+
+[[hooks.post_create]]
+type = "command"
+run = "apm install --update"
+shell = "auto"
