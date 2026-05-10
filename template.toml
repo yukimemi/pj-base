@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.3.0"
+version = "0.4.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -69,6 +69,33 @@ marker = { begin = "# kata:gitignore:base:begin", end = "# kata:gitignore:base:e
 [[file]]
 src = "apm.yml.tera"
 dst = "apm.yml"
+how = "overwrite"
+when = "once"
+
+# Seed the `apm install` output so a fresh `kata apply` doesn't
+# leave the working tree in a state that every `renri add` (which
+# runs `apm install --update` as a post_create hook) immediately
+# dirties with untracked SKILL.md / lock-file additions. `when =
+# "once"` because consumers are expected to bump these via
+# `apm install --update` (and commit the bump if they want it
+# pinned); kata only seeds the initial state.
+#
+# `.agents/skills/renri/SKILL.md` and `.claude/skills/renri/SKILL.md`
+# are byte-identical (apm copies the same SKILL.md to every
+# requested target). Shipped as separate paths because each
+# agent (Claude Code, Codex, …) loads from its own dir.
+[[file]]
+src = "apm.lock.yaml"
+how = "overwrite"
+when = "once"
+
+[[file]]
+src = ".agents/skills/renri/SKILL.md"
+how = "overwrite"
+when = "once"
+
+[[file]]
+src = ".claude/skills/renri/SKILL.md"
 how = "overwrite"
 when = "once"
 
