@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.4.0"
+version = "0.5.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -47,6 +47,18 @@ dst = ".gitignore"
 how = "merge-section"
 when = "always"
 marker = { begin = "# kata:gitignore:base:begin", end = "# kata:gitignore:base:end" }
+
+# Common .gitattributes patterns. Same marker-section convention as
+# .gitignore — projects can add their own attribute rules outside
+# the kata block. The shipped block normalizes every text file to
+# LF on commit (`* text=auto eol=lf`) so Windows-side writers
+# (apm install, future tools) can't leak CRLF into the repo.
+[[file]]
+src = ".gitattributes.base"
+dst = ".gitattributes"
+how = "merge-section"
+when = "always"
+marker = { begin = "# kata:gitattributes:base:begin", end = "# kata:gitattributes:base:end" }
 
 # APM consumer config. Tera-rendered so `name:` matches the
 # project's directory name. Static otherwise — the only reason
