@@ -11,16 +11,3 @@ Thumbs.db
 # committed (kata seeds them; renri post_create refreshes via
 # `apm install --update`); the apm_modules/ source cache is not.
 apm_modules/
-
-# kata's own state — track the canonical applied.toml (so a
-# fresh clone reproduces the apply state) and vars.toml (Renovate
-# bumps the action versions referenced from `.tera` workflow
-# templates in-place; needs tracked storage). Everything else
-# under `.kata/` (applied.local.toml, AI transcripts, future
-# local-only side-files) stays out of the repo. Note: the trailing
-# `/*` is required — git refuses to negate paths inside a wholesale-
-# ignored directory, so we have to ignore the contents pattern then
-# whitelist back.
-/.kata/*
-!/.kata/applied.toml
-!/.kata/vars.toml
