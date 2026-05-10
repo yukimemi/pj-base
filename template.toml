@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.5.0"
+version = "0.6.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
