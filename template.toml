@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.6.1"
+version = "0.7.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -144,3 +144,17 @@ src = "opencode.json"
 dst = "opencode.json"
 how = "overwrite"
 when = "always"
+
+# Consumer-side Renovate config — a minimal seed that just extends
+# `github>yukimemi/pj-base`, so the consumer's Renovate run pulls
+# in every universal rule from `pj-base/renovate.json` (auto-merge
+# patches, GHA grouping, vars.toml customManager, disable rules
+# for kata-managed workflow files) without copying them inline.
+# `when = "once"` so consumers can layer their own customManagers /
+# packageRules on top; the extends keeps pj-base's library current
+# automatically.
+[[file]]
+src = "renovate.json.seed"
+dst = "renovate.json"
+how = "overwrite"
+when = "once"

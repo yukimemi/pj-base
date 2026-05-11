@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "rangeStrategy": "bump",
+  "platformAutomerge": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 3am on monday"]
+  },
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 8,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^vars\\.toml$", "^\\.kata/vars\\.toml$"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)\\s*\\n[^=\\n]+=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "description": "Pick up action version pins inside `vars.toml` (template root, e.g. yukimemi/pj-rust) and `.kata/vars.toml` (consumer-side, after kata seeds it from a pj-rust v0.3.1+ stack). Each pin is preceded by a `# renovate: datasource=... depName=...` annotation; the regex captures both plus the value on the next non-comment line."
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^\\.github/workflows/.+\\.template$"],
+      "matchStrings": [
+        "uses:\\s*[\"']?(?<depName>[\\w./-]+)@(?<currentValue>[\\w./-]+)[\"']?"
+      ],
+      "datasourceTemplate": "github-tags",
+      "description": "Pick up `uses:` action references inside `.template` workflow files (kata sources). Renovate's default github-actions manager only scans `.yml`/`.yaml`; the `.template` suffix keeps GitHub Actions from auto-running the file in the template repo itself. This regex lets Renovate bump those `uses:` versions anyway. Fires in template repos (pj-rust-cli `release.yml.template`, pj-firebase `deploy.yml.template`, …) and is a no-op in consumer projects (their `.yml` is rendered, not `.template`)."
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Auto-merge patch / pin / digest bumps once CI passes.",
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Group all GitHub Actions updates into one PR (covers both the built-in github-actions manager and the regex customManager).",
+      "matchManagers": ["github-actions", "regex"],
+      "matchDatasources": ["github-tags"],
+      "groupName": "github-actions"
+    },
+    {
+      "description": "Consumer-side kata-managed workflow files (`ci.yml`, `release.yml`, `deploy.yml`) — action bumps happen UPSTREAM in the source pj-* template and flow to consumers via `kata apply`. Local renovate-driven bumps would either be reverted (`when=always` workflows like pj-rust's `ci.yml.tera`) or diverge silently (`when=once` workflows like pj-rust-cli's `release.yml.template` and pj-firebase's `deploy.yml.template`). Disable consumer-side scanning to avoid both failure modes.",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/release.yml",
+        ".github/workflows/deploy.yml"
+      ],
+      "enabled": false
+    }
+  ]
+}
