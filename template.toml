@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.9.0"
+version = "0.10.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -176,10 +176,12 @@ when = "once"
 # (`kata-apply/auto`) with the rendered-file diff and auto-merges
 # when CI passes — if CI fails the PR stays open for review.
 #
-# `.template` suffix keeps GitHub Actions from auto-running the
-# source inside pj-base itself (GHA only invokes `.yml`/`.yaml`).
-# kata strips the `.template` suffix on apply — consumers receive
-# `.github/workflows/kata-apply.yml` which GHA picks up.
+# `.tera` suffix keeps GitHub Actions from auto-running the
+# source inside pj-base itself (GHA only invokes `.yml`/`.yaml`)
+# AND opts the file into kata's Tera rendering so the workflow
+# can reference `{{ vars.actions.checkout }}` etc. from
+# `.kata/vars.toml`. kata strips the `.tera` suffix on apply —
+# consumers receive `.github/workflows/kata-apply.yml`.
 #
 # Setup requirement on every consumer (one-time):
 #   `KATA_APPLY_TOKEN` repo secret — classic PAT with `repo` +
@@ -193,11 +195,34 @@ when = "once"
 # automatically. Consumers who want to opt out can rename or
 # delete the rendered file; kata will re-create it on next apply,
 # so a real opt-out also means dropping the
-# `[[file]] src = ".github/workflows/kata-apply.yml.template"`
-# entry locally — which is an explicit, documented action, not an
+# `[[file]] src = ".github/workflows/kata-apply.yml.tera"` entry
+# locally — which is an explicit, documented action, not an
 # accidental drift.
 [[file]]
-src = ".github/workflows/kata-apply.yml.template"
+src = ".github/workflows/kata-apply.yml.tera"
 dst = ".github/workflows/kata-apply.yml"
 how = "overwrite"
 when = "always"
+
+# Action-version pins shared across kata-managed workflow
+# templates. Universal scope: this layer's `kata-apply.yml.tera`
+# uses `actions/checkout` and `peter-evans/create-pull-request`;
+# pj-rust's `ci.yml.tera` reuses the same `actions/checkout` pin
+# from here. Renovate's customManager scans this file (template
+# root) and the consumer's `.kata/vars.toml` independently — the
+# template-side bump flows down on next apply, the consumer-side
+# bump is consumer-owned and survives apply via the once gate.
+#
+# Layered composition: pj-base ships universal pins as
+# `overwrite, when=once`; pj-rust merges its `Swatinem/rust-cache`
+# pin into the same `.kata/vars.toml` via `merge-toml, when=once`.
+# Both fire on the first apply (yukimemi/kata#85 made
+# `when = "once"` composable across multiple entries to the same
+# dst), so the consumer's `.kata/vars.toml` ends up with the
+# union of both layers' pins. Renovate then bumps in-place and
+# kata's `once` gate keeps subsequent applies hands-off.
+[[file]]
+src = "vars.toml"
+dst = ".kata/vars.toml"
+how = "overwrite"
+when = "once"

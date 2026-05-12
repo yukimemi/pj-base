@@ -45,12 +45,13 @@
       "groupName": "github-actions"
     },
     {
-      "description": "Consumer-side kata-managed workflow files (`ci.yml`, `release.yml`, `deploy.yml`) — action bumps happen UPSTREAM in the source pj-* template and flow to consumers via `kata apply`. Local renovate-driven bumps would either be reverted (`when=always` workflows like pj-rust's `ci.yml.tera`) or diverge silently (`when=once` workflows like pj-rust-cli's `release.yml.template` and pj-firebase's `deploy.yml.template`). Disable consumer-side scanning to avoid both failure modes.",
+      "description": "Consumer-side kata-managed workflow files — action bumps happen UPSTREAM in the source pj-* template (pj-base's `kata-apply.yml.tera`, pj-rust's `ci.yml.tera`, pj-rust-cli's `release.yml.template`, pj-firebase's `deploy.yml.template`) and flow to consumers via `kata apply`. Renovate-driven local bumps would either be reverted (`when=always` workflows like ci.yml and kata-apply.yml) or diverge silently (`when=once` workflows like release.yml and deploy.yml). Disable consumer-side scanning to avoid both failure modes. The canonical pins live in `.kata/vars.toml` (customManager scans there) and in the `.template`/`.tera` sources upstream.",
       "matchManagers": ["github-actions"],
       "matchFileNames": [
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
-        ".github/workflows/deploy.yml"
+        ".github/workflows/deploy.yml",
+        ".github/workflows/kata-apply.yml"
       ],
       "enabled": false
     }

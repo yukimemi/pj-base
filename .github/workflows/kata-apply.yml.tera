@@ -19,10 +19,12 @@ name: kata-apply
 # rendered-file diff. Auto-merged when CI passes — if CI fails,
 # the PR stays open for human review.
 #
-# Source: yukimemi/pj-base. Filename carries `.template` so kata
-# strips the suffix on apply (pj-base itself has no `.kata` state,
-# so the workflow never fires there; consumer receives
-# `.github/workflows/kata-apply.yml`).
+# Source: yukimemi/pj-base. Filename carries `.tera` so kata
+# Tera-renders the file at apply time (substituting
+# `{{ vars.actions.* }}`) and strips the suffix — consumer
+# receives `.github/workflows/kata-apply.yml`. pj-base itself has
+# no `.kata` state, so the .tera source never executes in GHA in
+# this repo (GHA only invokes `.yml`/`.yaml`).
 
 on:
   schedule:
@@ -53,9 +55,9 @@ jobs:
       # CI from running on the auto-PR — making auto-merge wait for
       # checks that never fire. A PAT acts as a user-identity push
       # and triggers CI normally.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@{{ vars.actions.checkout }}
         with:
-          token: ${{ secrets.KATA_APPLY_TOKEN }}
+          token: {% raw %}${{ secrets.KATA_APPLY_TOKEN }}{% endraw %}
 
       - name: Install kata
         run: |
@@ -78,9 +80,9 @@ jobs:
 
       - name: Open / update PR if there are changes
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@{{ vars.actions.create_pull_request }}
         with:
-          token: ${{ secrets.KATA_APPLY_TOKEN }}
+          token: {% raw %}${{ secrets.KATA_APPLY_TOKEN }}{% endraw %}
           branch: kata-apply/auto
           delete-branch: true
           title: "chore(kata): auto-apply"
@@ -97,6 +99,6 @@ jobs:
       - name: Enable auto-merge
         if: steps.cpr.outputs.pull-request-number != ''
         env:
-          GH_TOKEN: ${{ secrets.KATA_APPLY_TOKEN }}
+          GH_TOKEN: {% raw %}${{ secrets.KATA_APPLY_TOKEN }}{% endraw %}
         run: |
-          gh pr merge --auto --squash ${{ steps.cpr.outputs.pull-request-number }}
+          gh pr merge --auto --squash {% raw %}${{ steps.cpr.outputs.pull-request-number }}{% endraw %}
