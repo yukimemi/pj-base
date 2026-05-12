@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.8.0"
+version = "0.9.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -168,18 +168,25 @@ src = "renovate.json"
 how = "overwrite"
 when = "once"
 
-# Auto-`kata apply` on `.kata/vars.toml` changes. When Renovate
-# bumps action-version pins in the consumer's `.kata/vars.toml`,
-# this workflow runs `kata apply` to re-render dependent files
-# (e.g. `.github/workflows/ci.yml`, produced by Tera-rendering
-# `ci.yml.tera`) and pushes the diff back to main as
-# `github-actions[bot]`. Without it, the rendered files stay stale
-# until someone runs `kata apply` manually.
+# Daily-cadence `kata update + kata apply` workflow. Covers two
+# kinds of drift between consumer state and template upstream:
+# (1) `.kata/vars.toml` action-version pins bumped by Renovate's
+# customManager, and (2) upstream pj-* template revs that
+# evolve outside the consumer's local cache. Opens a rolling PR
+# (`kata-apply/auto`) with the rendered-file diff and auto-merges
+# when CI passes — if CI fails the PR stays open for review.
 #
 # `.template` suffix keeps GitHub Actions from auto-running the
 # source inside pj-base itself (GHA only invokes `.yml`/`.yaml`).
 # kata strips the `.template` suffix on apply — consumers receive
 # `.github/workflows/kata-apply.yml` which GHA picks up.
+#
+# Setup requirement on every consumer (one-time):
+#   `KATA_APPLY_TOKEN` repo secret — classic PAT with `repo` +
+#   `workflow` scope. Required because the auto-PR has to trigger
+#   CI for the auto-merge gate to fire; GITHUB_TOKEN-opened PRs
+#   skip downstream workflows by GitHub design, so the workflow
+#   uses a PAT-owned identity instead.
 #
 # `when = "always"` because every consumer wants identical
 # behaviour and fixes to the workflow itself need to flow
