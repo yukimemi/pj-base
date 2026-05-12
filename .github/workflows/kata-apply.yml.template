@@ -1,0 +1,74 @@
+name: kata-apply
+
+# Auto-sync rendered kata-managed files when their inputs change.
+#
+# Today the canonical input is `.kata/vars.toml` — Renovate's
+# customManager bumps action-version pins there (see
+# `pj-base/default.json`), but the rendered output (e.g.
+# `.github/workflows/ci.yml`, produced by Tera-rendering
+# `ci.yml.tera`) doesn't reflect the bump until the next
+# `kata apply`. Without this workflow, the rendered file stays
+# stale until someone runs `kata apply` manually.
+#
+# This workflow runs `kata apply` on push to main whenever
+# `.kata/vars.toml` changes, then commits the rendered-file diff
+# back to main as `github-actions[bot]`.
+#
+# Source: yukimemi/pj-base — see pj-base#6 for design rationale.
+# Filename carries `.template` so kata strips the suffix on apply:
+# pj-base itself sees this as a non-workflow file (no `.yml`
+# extension); the consumer receives `kata-apply.yml` which GHA
+# picks up.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".kata/vars.toml"
+
+permissions:
+  contents: write
+
+concurrency:
+  # Serialise: if two vars.toml bumps land back-to-back, run them
+  # in order so the second doesn't push on top of a stale checkout.
+  group: kata-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    # Bot-commit guard: this workflow's own auto-commits run as
+    # `github-actions[bot]`. GITHUB_TOKEN pushes don't normally
+    # retrigger workflows, but the explicit check is belt-and-braces.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install kata
+        run: |
+          set -euo pipefail
+          KATA_VERSION="$(curl -fsSL https://api.github.com/repos/yukimemi/kata/releases/latest | jq -r .tag_name)"
+          echo "Installing kata ${KATA_VERSION}"
+          curl -fsSL "https://github.com/yukimemi/kata/releases/download/${KATA_VERSION}/kata-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C /tmp
+          sudo mv /tmp/kata /usr/local/bin/kata
+          kata --version
+
+      - name: kata apply
+        run: kata apply --non-interactive --no-ai
+
+      - name: Commit & push if changed
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes after kata apply — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(kata): refresh rendered files after .kata/vars.toml bump"
+          git push

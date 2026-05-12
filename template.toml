@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.7.1"
+version = "0.8.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -167,3 +167,30 @@ when = "always"
 src = "renovate.json"
 how = "overwrite"
 when = "once"
+
+# Auto-`kata apply` on `.kata/vars.toml` changes. When Renovate
+# bumps action-version pins in the consumer's `.kata/vars.toml`,
+# this workflow runs `kata apply` to re-render dependent files
+# (e.g. `.github/workflows/ci.yml`, produced by Tera-rendering
+# `ci.yml.tera`) and pushes the diff back to main as
+# `github-actions[bot]`. Without it, the rendered files stay stale
+# until someone runs `kata apply` manually.
+#
+# `.template` suffix keeps GitHub Actions from auto-running the
+# source inside pj-base itself (GHA only invokes `.yml`/`.yaml`).
+# kata strips the `.template` suffix on apply — consumers receive
+# `.github/workflows/kata-apply.yml` which GHA picks up.
+#
+# `when = "always"` because every consumer wants identical
+# behaviour and fixes to the workflow itself need to flow
+# automatically. Consumers who want to opt out can rename or
+# delete the rendered file; kata will re-create it on next apply,
+# so a real opt-out also means dropping the
+# `[[file]] src = ".github/workflows/kata-apply.yml.template"`
+# entry locally — which is an explicit, documented action, not an
+# accidental drift.
+[[file]]
+src = ".github/workflows/kata-apply.yml.template"
+dst = ".github/workflows/kata-apply.yml"
+how = "overwrite"
+when = "always"
