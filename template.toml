@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.7.0"
+version = "0.7.1"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -145,16 +145,25 @@ dst = "opencode.json"
 how = "overwrite"
 when = "always"
 
-# Consumer-side Renovate config — a minimal seed that just extends
-# `github>yukimemi/pj-base`, so the consumer's Renovate run pulls
-# in every universal rule from `pj-base/renovate.json` (auto-merge
-# patches, GHA grouping, vars.toml customManager, disable rules
-# for kata-managed workflow files) without copying them inline.
+# Consumer-side Renovate config — a minimal extends-only file
+# pointing at `github>yukimemi/pj-base`, which Renovate resolves to
+# `default.json` (Renovate's preset convention; the older fallback
+# to `renovate.json` is deprecated). Consumers pull in every
+# universal rule (auto-merge patches, GHA grouping, vars.toml
+# customManager, disable rules for kata-managed workflow files)
+# without copying them inline.
+#
 # `when = "once"` so consumers can layer their own customManagers /
 # packageRules on top; the extends keeps pj-base's library current
 # automatically.
+#
+# The same `renovate.json` file doubles as pj-base's OWN Renovate
+# config — Renovate searches for `renovate.json` (not `default.json`)
+# when scanning a repo's own dependencies, so pj-base needs one
+# locally too. The self-reference (`extends: ["github>yukimemi/pj-base"]`)
+# loops back to `pj-base/default.json`, the canonical
+# self-referencing preset pattern.
 [[file]]
-src = "renovate.json.seed"
-dst = "renovate.json"
+src = "renovate.json"
 how = "overwrite"
 when = "once"
