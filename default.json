@@ -34,8 +34,8 @@
   ],
   "packageRules": [
     {
-      "description": "Auto-merge patch / pin / digest bumps once CI passes.",
-      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "description": "Auto-merge minor / patch / pin / digest bumps once CI passes. Major bumps still require human review.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     },
     {
