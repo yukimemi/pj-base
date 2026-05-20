@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.11.0"
+version = "0.12.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -86,11 +86,13 @@ when = "once"
 
 # Seed the `apm install` output so a fresh `kata apply` doesn't
 # leave the working tree in a state that every `renri add` (which
-# runs `apm install --update` as a post_create hook) immediately
-# dirties with untracked SKILL.md / lock-file additions. `when =
-# "once"` because consumers are expected to bump these via
-# `apm install --update` (and commit the bump if they want it
-# pinned); kata only seeds the initial state.
+# runs `apm install` as a post_create hook) immediately dirties
+# with untracked SKILL.md additions. `when = "once"` because the
+# locked SKILL.md / lock-file state is now refreshed by the
+# weekly `apm-bump.yml` workflow (auto-PR if upstream moves) and
+# consumers can also manually `apm install --update && git
+# commit` for a one-off bump; either way kata only seeds the
+# initial state on first apply.
 #
 # `.agents/skills/renri/SKILL.md` and `.claude/skills/renri/SKILL.md`
 # are byte-identical (apm copies the same SKILL.md to every
@@ -112,17 +114,19 @@ how = "overwrite"
 when = "once"
 
 # renri worktree config. Language-agnostic baseline: a single
-# post_create hook that runs `apm install --update` so every
-# fresh worktree picks up the latest renri skill. Language layers
-# (pj-rust, pj-go, pj-bun) overwrite this file with a richer
-# hook that delegates to their build-system's on-add task.
+# post_create hook that runs `apm install` so every fresh worktree
+# installs the locked renri skill (idempotent — no lock churn).
+# Upstream-refresh is handled by the weekly `apm-bump.yml`
+# workflow, not this hook. Language layers (pj-rust, pj-go,
+# pj-bun) overwrite this file with a richer hook that delegates
+# to their build-system's on-add task.
 # Source name carries the `.base` suffix for symmetry with
 # `AGENTS.md.base` / `.gitignore.base` — same convention: layer
 # suffix on every src that participates in compose conflicts.
 #
 # `merge-toml` keyed on `hooks.post_create[0]` (yukimemi/kata#108)
-# so kata owns the first hook entry — the `apm install --update`
-# skill refresh — and consumer projects can freely append their
+# so kata owns the first hook entry — the `apm install` skill
+# install — and consumer projects can freely append their
 # own `[[hooks.post_create]]` blocks without `kata apply`
 # clobbering them. For Rust projects this directive is overridden
 # by pj-rust's richer `cargo make on-add` chain (kata's last-
@@ -215,6 +219,26 @@ when = "once"
 [[file]]
 src = ".github/workflows/kata-apply.yml.tera"
 dst = ".github/workflows/kata-apply.yml"
+how = "overwrite"
+when = "always"
+
+# apm-bump — weekly cron that runs `apm install --update` and
+# opens an auto-PR if `apm.lock.yaml` changed. The Renovate-
+# equivalent for APM agent skills.
+#
+# Companion to the `renri.toml.base` change above: post_create
+# now runs `apm install` (idempotent, no --update) so worktrees
+# don't churn the lock; the upstream-refresh moves out of the
+# `renri add` hot path and into this scheduled workflow.
+#
+# Same `.tera` suffix story as kata-apply.yml.tera — keeps GHA
+# from auto-running the source inside pj-base while opting the
+# file into kata's Tera rendering for the action-version pins.
+# Same `KATA_APPLY_TOKEN` PAT requirement (auto-PR needs to fire
+# CI for the auto-merge gate).
+[[file]]
+src = ".github/workflows/apm-bump.yml.tera"
+dst = ".github/workflows/apm-bump.yml"
 how = "overwrite"
 when = "always"
 
