@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.10.0"
+version = "0.11.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -119,11 +119,25 @@ when = "once"
 # Source name carries the `.base` suffix for symmetry with
 # `AGENTS.md.base` / `.gitignore.base` — same convention: layer
 # suffix on every src that participates in compose conflicts.
+#
+# `merge-toml` keyed on `hooks.post_create[0]` (yukimemi/kata#108)
+# so kata owns the first hook entry — the `apm install --update`
+# skill refresh — and consumer projects can freely append their
+# own `[[hooks.post_create]]` blocks without `kata apply`
+# clobbering them. For Rust projects this directive is overridden
+# by pj-rust's richer `cargo make on-add` chain (kata's last-
+# layer-wins compose rule), so this path only fires for projects
+# that use pj-base alone (future pj-go / pj-bun consumers).
+# `ui.show_pr` stays kata-managed so the renri-list PR badge
+# defaults stay uniform across yukimemi/* projects.
+# Requires kata >= 0.11.0; older kata silently no-ops on the
+# bracket form.
 [[file]]
 src = "renri.toml.base"
 dst = "renri.toml"
-how = "overwrite"
+how = "merge-toml"
 when = "always"
+paths = ["ui.show_pr", "hooks.post_create[0]"]
 
 # Gemini CLI settings — grant access to ~/wt so that worktrees
 # created by renri (which live under ~/wt) are reachable by the
