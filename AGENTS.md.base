@@ -10,10 +10,15 @@ here so each tool's auto-load behaviour still finds something.
 
 - **No direct push to `main`.** Open a PR.
   - Exception: trivial typo / whitespace / docs wording fixes.
-  - Exception: standalone version bumps.
 - Branch names: `feat/...`, `fix/...`, `chore/...`.
 - **PR titles + bodies in English. Commit messages in English.**
-- Tag-based releases: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+- **Releases are PR-driven, tagging is automatic.** Bump
+  `[workspace.package].version` (workspace) or `[package].version`
+  (single crate) in a `chore/release-vX.Y.Z` PR. On merge to `main`,
+  `.github/workflows/auto-tag.yml` (kata-managed) detects the bump,
+  pushes the `vX.Y.Z` tag, and that tag fires `release.yml` for
+  binary builds + crates.io publish. **Do not run `git tag` by
+  hand** — the bot tag will collide and the manual push fails.
 
 ### PR review cycle
 
@@ -32,6 +37,13 @@ here so each tool's auto-load behaviour still finds something.
 - **Merge gate**: review bots quiet AND owner explicit approval.
 - Bot-authored PRs (Renovate / Dependabot) skip the bot-review
   gate; CI green + owner approval is enough.
+- **Version-bump-only PRs** (a single `chore/release-vX.Y.Z`
+  branch whose entire diff is `[workspace.package].version` /
+  `[package].version` + the matching inter-crate refs +
+  `Cargo.lock`) **also skip the bot-review gate.** There is
+  nothing for the bots to find in a version bump, and the
+  release pipeline downstream of merge (auto-tag → release.yml)
+  is time-sensitive. CI green + owner approval is enough.
 
 ### Worktree workflow
 
