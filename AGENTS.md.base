@@ -67,6 +67,13 @@ here so each tool's auto-load behaviour still finds something.
   nothing for the bots to find in a version bump, and the
   release pipeline downstream of merge (auto-tag → release.yml)
   is time-sensitive. CI green + owner approval is enough.
+- **Treat CodeRabbit rate-limit notices as "quiet" for the
+  merge gate.** If CodeRabbit only posts a "Review limit
+  reached" quota-exhaustion message (no findings, no inline
+  comments), it has produced no review content — there is
+  nothing to address. Re-trigger with `@coderabbitai review`
+  once the quota refills if you want a real pass; for small or
+  time-sensitive PRs, merge on owner approval without waiting.
 
 ### Worktree workflow
 
