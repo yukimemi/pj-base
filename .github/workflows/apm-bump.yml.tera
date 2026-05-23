@@ -28,7 +28,7 @@ name: apm-bump
 # `.tera` suffix: same dual purpose as the other workflow
 # templates here — keeps GHA from auto-running the source inside
 # pj-base, and opts the file into kata's Tera rendering for the
-# `{{ vars.actions.* }}` action-version pins.
+# {% raw %}`{{ vars.actions.* }}`{% endraw %} action-version pins.
 #
 # Setup requirement on every consumer (one-time):
 #   `KATA_APPLY_TOKEN` repo secret — classic PAT with `repo` +
