@@ -28,8 +28,10 @@ here so each tool's auto-load behaviour still finds something.
   feedback is resolved.
 - **After opening a PR, immediately enter the review-monitoring
   loop — do not ask the user whether to start it.** Drive the
-  cadence with `/loop` (which re-schedules via `ScheduleWakeup`)
-  so the agent actively pulls fresh state each tick with
+  cadence with `/loop` — fixed-interval mode (e.g.
+  `/loop 60s …`) schedules ticks via `CronCreate`; dynamic mode
+  (no interval, `/loop …`) self-paces via `ScheduleWakeup`. The
+  agent actively pulls fresh state each tick with
   `gh pr view <N> --json state,reviews,comments,statusCheckRollup`
   and `gh api repos/<owner>/<repo>/pulls/<N>/comments` (the
   latter covers inline review comments, which `gh pr view`
