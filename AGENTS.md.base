@@ -30,11 +30,13 @@ here so each tool's auto-load behaviour still finds something.
   loop — do not ask the user whether to start it.** Drive the
   cadence with `/loop` (which re-schedules via `ScheduleWakeup`)
   so the agent actively pulls fresh state each tick with
-  `gh pr view` / `gh pr checks` / `gh api .../comments` and
-  reacts to new bot feedback. Passive watchers (background `gh`
-  polls, file watchers, hooks) cannot trigger active follow-up,
-  so they are not a substitute — without an active wake-up the
-  agent never re-reads the PR.
+  `gh pr view <N> --json state,reviews,comments,statusCheckRollup`
+  and `gh api repos/<owner>/<repo>/pulls/<N>/comments` (the
+  latter covers inline review comments, which `gh pr view`
+  does not surface) and reacts to new bot feedback. Passive
+  watchers (background `gh` polls, file watchers, hooks) cannot
+  trigger active follow-up, so they are not a substitute —
+  without an active wake-up the agent never re-reads the PR.
 - **Default polling interval: 60s.** Gemini Code Assist /
   CodeRabbit historically reply within ~1–3 minutes of a push or
   thread reply, so a 60s tick catches them on the next wake-up
