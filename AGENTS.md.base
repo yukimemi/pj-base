@@ -26,6 +26,25 @@ here so each tool's auto-load behaviour still finds something.
   **CodeRabbit**. Wait for both bots to post, address their
   comments (push fixes to the PR branch), and merge only after
   feedback is resolved.
+- **After opening a PR, immediately enter the review-monitoring
+  loop — do not ask the user whether to start it.** Drive the
+  cadence with `/loop` (which re-schedules via `ScheduleWakeup`)
+  so the agent actively pulls fresh state each tick with
+  `gh pr view` / `gh pr checks` / `gh api .../comments` and
+  reacts to new bot feedback. Passive watchers (background `gh`
+  polls, file watchers, hooks) cannot trigger active follow-up,
+  so they are not a substitute — without an active wake-up the
+  agent never re-reads the PR.
+- **Default polling interval: 60s.** Gemini Code Assist /
+  CodeRabbit historically reply within ~1–3 minutes of a push or
+  thread reply, so a 60s tick catches them on the next wake-up
+  without burning cache: 60s sits well inside the 5-minute
+  prompt-cache TTL, so the conversation context stays cached
+  across ticks. Do **not** stretch the interval to 300s — that
+  is the worst-of-both window (you pay the cache miss without
+  amortizing it). If the PR is genuinely idle (all threads
+  settled, only waiting on owner approval), step **up** to
+  1200–1800s instead.
 - **Reply to reviewers after pushing a fix.** Reply on the
   corresponding review thread with an **@-mention**
   (`@gemini-code-assist` / `@coderabbitai`). Silent fixes are
