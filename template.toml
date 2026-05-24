@@ -62,7 +62,7 @@ marker = { begin = "# kata:gitattributes:base:begin", end = "# kata:gitattribute
 
 # APM consumer config. Tera-rendered so `name:` matches the
 # project's directory name. Static otherwise — the only reason
-# yukimemi/* projects ship apm.yml is to vendor the renri skill.
+# projects using these templates ship apm.yml is to vendor the renri skill.
 # `dst` is spelled out even though kata's `.tera` opt-in
 # convention would derive the same name; explicit reads better.
 #
@@ -133,7 +133,7 @@ when = "once"
 # layer-wins compose rule), so this path only fires for projects
 # that use pj-base alone (future pj-go / pj-bun consumers).
 # `ui.show_pr` stays kata-managed so the renri-list PR badge
-# defaults stay uniform across yukimemi/* projects.
+# defaults stay uniform across projects using these templates.
 # Requires kata >= 0.11.0; older kata silently no-ops on the
 # bracket form.
 [[file]]
@@ -146,7 +146,7 @@ paths = ["ui.show_pr", "hooks.post_create[0]"]
 # Gemini CLI settings — grant access to ~/wt so that worktrees
 # created by renri (which live under ~/wt) are reachable by the
 # Gemini agent. Applied as a project-level settings file so every
-# yukimemi/* project automatically inherits the permission.
+# project using these templates automatically inherits the permission.
 [[file]]
 src = ".gemini/settings.json"
 dst = ".gemini/settings.json"

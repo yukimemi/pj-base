@@ -1,4 +1,4 @@
-## yukimemi/* shared conventions
+## Shared conventions
 
 This file is the agent-agnostic source of truth (per the
 [agents.md](https://agents.md) convention). The matching

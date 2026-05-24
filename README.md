@@ -1,7 +1,7 @@
 # pj-base
 
 Language-agnostic [kata](https://github.com/yukimemi/kata) template
-— the LICENSE / repo-hygiene boilerplate every yukimemi/* project
+— the LICENSE / repo-hygiene boilerplate every consumer project
 shares.
 
 ## Layered with

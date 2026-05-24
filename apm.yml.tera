@@ -1,5 +1,5 @@
-# Required-by-APM but intentionally static. yukimemi/* projects
-# are not APM publishers; this apm.yml exists only to install
+# Required-by-APM but intentionally static. Projects using these
+# templates are not APM publishers; this apm.yml exists only to install
 # agent skills that contributors want available while working on
 # this repo — currently the `renri` worktree skill.
 name: {{ project.name }}
