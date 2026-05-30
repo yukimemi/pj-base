@@ -71,6 +71,7 @@ jobs:
       - uses: actions/checkout@{{ vars.actions.checkout }}
         with:
           token: {% raw %}${{ secrets.KATA_APPLY_TOKEN }}{% endraw %}
+          persist-credentials: false
 
       - name: Install apm
         # aka.ms/apm-unix is the Unix one-liner installer published
