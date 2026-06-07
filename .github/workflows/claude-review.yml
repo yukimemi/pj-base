@@ -19,7 +19,7 @@ name: claude-review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, ready_for_review, reopened]
 
 permissions:
   contents: read
@@ -27,8 +27,9 @@ permissions:
   id-token: write
 
 concurrency:
-  # One review per PR at a time; a new push supersedes the
-  # in-flight review (reviewing a stale diff is wasted tokens).
+  # One review per PR at a time; a re-fire (reopen / ready)
+  # supersedes an in-flight run (reviewing a stale diff is wasted
+  # tokens).
   group: claude-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
