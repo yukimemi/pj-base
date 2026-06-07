@@ -52,8 +52,17 @@
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
         ".github/workflows/deploy.yml",
-        ".github/workflows/kata-apply.yml"
+        ".github/workflows/kata-apply.yml",
+        ".github/workflows/apm-bump.yml",
+        ".github/workflows/claude-review.yml",
+        ".github/workflows/claude.yml"
       ],
+      "enabled": false
+    },
+    {
+      "description": "The `claude_code_action` pin is kata-managed in consumer repos (back-filled into `.kata/vars.toml` via pj-base's `merge-toml, when=always` entry, unlike the consumer-owned `checkout` / `create_pull_request` pins). The canonical bump happens in pj-base's own vars.toml and flows down on the next kata apply — a consumer-side Renovate bump would be reverted by that apply, re-opened by Renovate, and so on. Disable consumer-side scanning of this one dep to break the cycle.",
+      "matchDepNames": ["anthropics/claude-code-action"],
+      "matchFileNames": [".kata/vars.toml"],
       "enabled": false
     }
   ]
