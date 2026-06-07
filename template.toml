@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.12.1"
+version = "0.13.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -242,6 +242,37 @@ dst = ".github/workflows/apm-bump.yml"
 how = "overwrite"
 when = "always"
 
+# claude-review — automatic Claude Code review on every
+# human-authored PR (replacement for the discontinued Gemini Code
+# Assist free tier). Skips review-exempt PRs per the AGENTS.md
+# "PR review cycle" rules: `chore/release-*` version bumps, the
+# `kata-apply/auto` / `apm-bump/auto` rolling branches, and
+# Renovate / Dependabot authors.
+#
+# Same `.tera` suffix story as kata-apply.yml.tera — keeps GHA
+# from auto-running the source inside pj-base while opting the
+# file into kata's Tera rendering for the action-version pins.
+#
+# Setup requirement on every consumer (one-time): the Claude
+# GitHub App (github.com/apps/claude) installed on the repo, plus
+# a `CLAUDE_CODE_OAUTH_TOKEN` secret generated via
+# `claude setup-token` (Claude Pro/Max subscription).
+[[file]]
+src = ".github/workflows/claude-review.yml.tera"
+dst = ".github/workflows/claude-review.yml"
+how = "overwrite"
+when = "always"
+
+# claude — interactive `@claude` mention responder (PR / issue
+# comments). Companion to claude-review above; fires only on
+# explicit mentions, so no skip policy needed. Same one-time
+# consumer setup (GitHub App + CLAUDE_CODE_OAUTH_TOKEN).
+[[file]]
+src = ".github/workflows/claude.yml.tera"
+dst = ".github/workflows/claude.yml"
+how = "overwrite"
+when = "always"
+
 # Action-version pins shared across kata-managed workflow
 # templates. Universal scope: this layer's `kata-apply.yml.tera`
 # uses `actions/checkout` and `peter-evans/create-pull-request`;
@@ -264,3 +295,30 @@ src = "vars.toml"
 dst = ".kata/vars.toml"
 how = "overwrite"
 when = "once"
+
+# Back-fill of the `claude_code_action` pin for ALREADY-INITIALIZED
+# consumers. The seed entry above is `when = "once"`, so a key
+# added to vars.toml after a consumer's first apply never reaches
+# their `.kata/vars.toml` — and the claude workflow templates'
+# `claude_code_action` reference would then fail kata's strict
+# Tera render (undefined variable → `kata apply` aborts), breaking
+# every existing consumer's daily kata-apply run.
+#
+# merge-toml with a narrow `paths` list is idempotent and
+# non-clobbering: it only syncs the listed key, leaving the
+# consumer-owned (Renovate-bumped) `checkout` /
+# `create_pull_request` pins untouched — same ownership pattern as
+# the `renri.toml.base` entry's `ui.show_pr`. `when = "always"`
+# so the back-fill actually reaches consumers whose dst already
+# exists (a `when = "once"` merge entry would be gated out by
+# `once_applied = true`). Ownership consequence: this key is
+# kata-managed in consumer repos — the canonical bump happens in
+# pj-base's vars.toml and flows down on apply; consumer-side
+# Renovate scanning of this dep is disabled in `default.json` to
+# avoid a bump→revert cycle.
+[[file]]
+src = "vars.toml"
+dst = ".kata/vars.toml"
+how = "merge-toml"
+when = "always"
+paths = ["actions.claude_code_action"]
