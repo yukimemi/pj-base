@@ -115,6 +115,21 @@ here so each tool's auto-load behaviour still finds something.
 
 ### Worktree workflow
 
+> **Before your FIRST edit to any file, run `renri add` — NEVER edit the
+> main checkout.** Read-only inspection (Read / Grep / Glob) stays on the
+> main checkout; the instant you intend to *change* a file, you must
+> already be in a worktree. The trap that keeps catching agents: diving
+> into a fix the moment the diagnosis lands and editing in place. A
+> concurrent agent shares the main checkout — your in-place edits will
+> clobber theirs or be clobbered, and in a jj-colocated repo a stray
+> working-copy commit entangles unrelated WIP into your branch. If you
+> slip and edit in the main checkout, capture the diff first (jj already
+> snapshotted it into the working-copy commit, so `jj diff > patch`; for
+> git, `git stash` or save a patch — if you got as far as committing on a
+> branch, just push it). Then reset the main checkout to pristine main
+> (`jj new main@origin`, or `git switch -`), `renri add` a worktree, and
+> re-apply the captured diff there.
+
 Use [`renri`](https://github.com/yukimemi/renri) for any
 commit-bound change. From the main checkout:
 
