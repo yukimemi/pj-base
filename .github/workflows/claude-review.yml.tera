@@ -52,15 +52,22 @@ name: claude-review
 # went unnoticed on yukimemi/rvpm.nvim until the run log was read
 # by hand. Fail loudly instead.
 #
-# EXPECTED on the PR that first adds this workflow to a repo: the
-# action logs "Skipping action due to workflow validation" and
-# exits 0 without reviewing. claude-code-action requires the
-# workflow file to already exist on the default branch with
-# identical content (otherwise a PR could rewrite the workflow to
-# exfiltrate the token). The adoption PR therefore cannot review
-# itself — the workflow starts working on the NEXT PR, once it has
-# landed on the default branch. Nothing to fix; merge on CI +
-# owner approval.
+# EXPECTED whenever a PR's copy of this file differs from the one
+# on the default branch: the action logs "Skipping action due to
+# workflow validation" and exits 0 without reviewing.
+# claude-code-action requires byte-identical content on the default
+# branch, otherwise a PR could rewrite the workflow to exfiltrate
+# the token. Two cases hit it:
+#   1. the PR that first adopts these templates, and
+#   2. any later PR that EDITS this file — e.g. hand-pulling an
+#      upstream fix into a consumer repo.
+# The second is the surprising one and reads like a regression; it
+# is not. Either way the check is green with no review attached.
+# Nothing to fix; merge on CI + owner approval, and reviews resume
+# on the next PR that leaves the workflows alone.
+#
+# Telling the two silent-green cases apart: no credential -> RED
+# (the guard below), workflow validation -> GREEN with no review.
 #
 # `when = "always"` (in template.toml): every consumer wants
 # identical review behaviour; fixes to the workflow itself flow
