@@ -67,6 +67,11 @@
       "matchDepNames": ["anthropics/claude-code-action"],
       "matchFileNames": [".kata/vars.toml"],
       "enabled": false
+    },
+    {
+      "description": "thinca/action-setup-vim publishes a parallel `<version>+src` tag for each release (v3.0.2 AND v3.0.2+src). The `+src` variant is a source-build marker and does NOT contain the compiled `action.js`, so resolving a workflow `uses:` to it fails the job with \"File not found: .../action.js\". The github-tags datasource sorts `+src` highest and would keep picking it, so exclude build-metadata tags outright.",
+      "matchDepNames": ["thinca/action-setup-vim"],
+      "allowedVersions": "!/\\+src$/"
     }
   ]
 }
