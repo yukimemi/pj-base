@@ -18,7 +18,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^vars\\.toml$", "^\\.kata/vars\\.toml$"],
+      "managerFilePatterns": ["/^vars\\.toml$/", "/^\\.kata/vars\\.toml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)\\s*\\n[^=\\n]+=\\s*\"(?<currentValue>[^\"]+)\""
       ],
@@ -26,7 +26,7 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["^\\.github/workflows/.+\\.template$"],
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.template$/"],
       "matchStrings": [
         "uses:\\s*[\"']?(?<depName>[\\w./-]+)@(?<currentValue>[\\w./-]+)[\"']?"
       ],
