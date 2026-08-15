@@ -7,7 +7,6 @@
   ],
   "rangeStrategy": "bump",
   "platformAutomerge": true,
-  "labels": ["automerge"],
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 3am on monday"],
@@ -52,7 +51,6 @@
       "matchFileNames": [
         ".github/workflows/auto-tag.yml",
         ".github/workflows/ci.yml",
-        ".github/workflows/deno-update.yml",
         ".github/workflows/release.yml",
         ".github/workflows/deploy.yml",
         ".github/workflows/kata-apply.yml",
