@@ -35,6 +35,11 @@
   ],
   "packageRules": [
     {
+      "description": "Hold every update back until the release is 3 days old. Two reasons. (1) Deno enforces its own `minimumDependencyAge` (default 24 hours) at resolve time, so a PR opened minutes after a JSR publish fails CI with \"Could not find version ... that matches specified version constraint\" plus a minimum-dependency-age hint — the automerge never fires and the PR sits until someone re-runs CI a day later. (2) A short quarantine is cheap supply-chain insurance across every ecosystem here (JSR, npm, crates.io, GitHub Actions): compromised or broken releases are usually yanked within hours. 3 days clears Deno's 24h window with margin for clock skew and for Renovate's own scan interval.",
+      "matchPackageNames": ["*"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "description": "Auto-merge minor / patch / pin / digest bumps once CI passes. Major bumps still require human review.",
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
