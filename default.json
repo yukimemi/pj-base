@@ -51,13 +51,9 @@
       "groupName": "github-actions"
     },
     {
-      "description": "Consumer-side kata-managed workflow files — action bumps happen UPSTREAM in the source pj-* template (pj-base's `kata-apply.yml.tera`, pj-rust's `ci.yml.tera` and `auto-tag.yml.tera`, pj-rust-cli's `release.yml.template`, pj-firebase's `deploy.yml.template`, pj-denops's `ci.yml.tera` and `deno-update.yml.tera`) and flow to consumers via `kata apply`. Renovate-driven local bumps would either be reverted (`when=always` workflows like auto-tag.yml, ci.yml, deno-update.yml and kata-apply.yml) or diverge silently (`when=once` workflows like release.yml and deploy.yml). Disable consumer-side scanning to avoid both failure modes. The canonical pins live in `.kata/vars.toml` (customManager scans there) and in the `.template`/`.tera` sources upstream.",
+      "description": "Consumer-side kata-managed workflow files THIS layer owns — action bumps happen UPSTREAM in `kata-apply.yml.tera` / `apm-bump.yml.tera` / `claude-review.yml.tera` / `claude.yml.tera` and flow to consumers via `kata apply`, so a Renovate-driven local bump would just be reverted on the next apply. The canonical pins live in `.kata/vars.toml` (the customManager above scans there). Each language layer disables ITS OWN rendered workflows the same way — pj-rust for `ci.yml` / `auto-tag.yml`, pj-rust-cli / pj-rust-lib / pj-rust-workspace for `release.yml`, pj-denops and pj-nvim for their `ci.yml`, pj-firebase for `deploy.yml`. pj-base must NOT list those names: it is the bottom layer and cannot know which layers compose above it, and hardcoding them here blocks projects that legitimately hand-write a file of the same name (a Lume blog on the `base` preset owning its own `ci.yml`, for instance).",
       "matchManagers": ["github-actions"],
       "matchFileNames": [
-        ".github/workflows/auto-tag.yml",
-        ".github/workflows/ci.yml",
-        ".github/workflows/release.yml",
-        ".github/workflows/deploy.yml",
         ".github/workflows/kata-apply.yml",
         ".github/workflows/apm-bump.yml",
         ".github/workflows/claude-review.yml",
@@ -70,11 +66,6 @@
       "matchDepNames": ["anthropics/claude-code-action"],
       "matchFileNames": [".kata/vars.toml"],
       "enabled": false
-    },
-    {
-      "description": "thinca/action-setup-vim publishes a parallel `<version>+src` tag for each release (v3.0.2 AND v3.0.2+src). The `+src` variant is a source-build marker and does NOT contain the compiled `action.js`, so resolving a workflow `uses:` to it fails the job with \"File not found: .../action.js\". The github-tags datasource sorts `+src` highest and would keep picking it, so exclude build-metadata tags outright.",
-      "matchDepNames": ["thinca/action-setup-vim"],
-      "allowedVersions": "!/\\+src$/"
     }
   ]
 }
