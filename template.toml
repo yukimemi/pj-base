@@ -163,17 +163,17 @@ dst = "opencode.json"
 how = "overwrite"
 when = "always"
 
-# Consumer-side Renovate config — a minimal extends-only file
-# pointing at `github>yukimemi/pj-base`, which Renovate resolves to
-# `default.json` (Renovate's preset convention; the older fallback
-# to `renovate.json` is deprecated). Consumers pull in every
-# universal rule (auto-merge patches, GHA grouping, vars.toml
-# customManager, disable rules for kata-managed workflow files)
-# without copying them inline.
+# Consumer-side Renovate config — a minimal extends-only file naming
+# a kata layer, which Renovate resolves to that repo's `default.json`
+# (Renovate's preset convention; the older fallback to
+# `renovate.json` is deprecated). Every pj-* preset extends the layer
+# below it, so one entry pulls in the whole chain and consumers get
+# every rule — universal (auto-merge, GHA grouping, vars.toml
+# customManager) and layer-specific (each layer disabling ITS OWN
+# rendered workflows) — without copying anything inline.
 #
-# `when = "once"` so consumers can layer their own customManagers /
-# packageRules on top; the extends keeps pj-base's library current
-# automatically.
+# `when = "once"` for the file as a whole so consumers can layer
+# their own customManagers / packageRules on top.
 #
 # The same `renovate.json` file doubles as pj-base's OWN Renovate
 # config — Renovate searches for `renovate.json` (not `default.json`)
@@ -185,6 +185,29 @@ when = "always"
 src = "renovate.json"
 how = "overwrite"
 when = "once"
+
+# ...but `extends` itself stays kata-managed via a narrow `merge-json`
+# sync, same ownership split as the `renri.toml` (`ui.show_pr`) and
+# `.kata/vars.toml` (`actions.claude_code_action`) entries above.
+#
+# EVERY layer ships this same entry naming ITSELF, and kata's compose
+# rule (last layer wins on file conflicts) then resolves `extends` to
+# the topmost APPLIED layer automatically — no layer has to know what
+# sits above it, and no preset var is needed. The `base` preset ends
+# here and gets pj-base; `rust-cli` runs base -> rust -> rust-cli and
+# ends up with pj-rust-cli.
+#
+# `when = "always"` rather than folding it into the `once` seed,
+# because the layer-specific disable rules moved OUT of pj-base into
+# each owning layer: a consumer whose `extends` still says
+# `github>yukimemi/pj-base` would silently lose the `release.yml` /
+# `ci.yml` disables that used to live here. This entry is what
+# repairs those consumers on their next `kata apply`.
+[[file]]
+src = "renovate.json"
+how = "merge-json"
+when = "always"
+paths = ["extends"]
 
 # Daily-cadence `kata update + kata apply` workflow. Covers two
 # kinds of drift between consumer state and template upstream:
