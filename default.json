@@ -17,11 +17,11 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^vars\\.toml$/", "/^\\.kata/vars\\.toml$/"],
+      "managerFilePatterns": ["/^vars\\.toml$/", "/^vars\\.[^/]+\\.toml$/", "/^\\.kata/vars\\.toml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)\\s*\\n[^=\\n]+=\\s*\"(?<currentValue>[^\"]+)\""
       ],
-      "description": "Pick up action version pins inside `vars.toml` (template root, e.g. yukimemi/pj-rust) and `.kata/vars.toml` (consumer-side, after kata seeds it from a pj-rust v0.3.1+ stack). Each pin is preceded by a `# renovate: datasource=... depName=...` annotation; the regex captures both plus the value on the next non-comment line."
+      "description": "Pick up action version pins inside `vars.toml` (pj-base's own seed), `vars.<layer>.toml` (each language layer's seed — `vars.nvim.toml`, `vars.rust.toml`, `vars.denops.toml`), and `.kata/vars.toml` (consumer-side, after kata seeds it). Each pin is preceded by a `# renovate: datasource=... depName=...` annotation; the regex captures both plus the value on the next non-comment line. The layer pattern matters because a layer seed is what every NEW `kata init` consumer starts from: without it those pins are scanned in no repository at all (the layer file name never matched, and consumers only ever receive the merged `.kata/vars.toml`), so they silently rot — `JohnnyMorganz/stylua-action` sat at v4 in pj-nvim while consumers had already been offered v5."
     },
     {
       "customType": "regex",
