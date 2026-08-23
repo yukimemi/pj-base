@@ -6,6 +6,12 @@ name: claude
 # here. Keep in sync with the `.tera` source; pins inlined from
 # `vars.toml`. Same one-time setup (Claude GitHub App +
 # `CLAUDE_CODE_OAUTH_TOKEN` secret).
+#
+# No `pull_request_review` trigger — see `claude.yml.tera` for why: a
+# reply to an inline comment fires that event with an empty `review.body`,
+# the `@claude` is invisible to the job's `if`, and the resulting skipped
+# "claude" check blocks the merge (yukimemi/hakari#18). In-thread replies
+# are handled by `pull_request_review_comment`.
 
 on:
   issue_comment:
@@ -14,8 +20,6 @@ on:
     types: [created]
   issues:
     types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
 
 permissions:
   # contents/pull-requests/issues write: Claude may push fix
@@ -40,7 +44,6 @@ jobs:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     # Same rationale as claude-review.yml: the action has no
