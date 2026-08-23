@@ -1,5 +1,5 @@
 name = "pj-base"
-version = "0.15.0"
+version = "0.16.0"
 
 # Language-agnostic boilerplate. Compose with `pj-rust` / `pj-go` /
 # `pj-bun` for the language layer, and `pj-{rust,go,bun}-cli` for
@@ -215,9 +215,10 @@ paths = ["extends"]
 # customManager, and (2) upstream pj-* template revs that
 # evolve outside the consumer's local cache. Opens a rolling PR
 # (`kata-apply/auto`) with the rendered-file diff and auto-merges
-# when CI passes — if CI fails the PR stays open for review. In a
-# repo with no required status checks auto-merge can't be armed at
-# all, so the PR just stays open and the run still succeeds.
+# when CI passes — if CI fails the PR stays open for review. When
+# auto-merge can't be armed at all — no required checks, or none
+# registered yet at that instant — the PR just stays open and the
+# run still succeeds.
 #
 # `.tera` suffix keeps GitHub Actions from auto-running the
 # source inside pj-base itself (GHA only invokes `.yml`/`.yaml`)
