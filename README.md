@@ -8,6 +8,9 @@ shares.
 
 - [`pj-rust`](https://github.com/yukimemi/pj-rust) — Rust language layer
 - [`pj-rust-cli`](https://github.com/yukimemi/pj-rust-cli) — Rust CLI extras
+- [`pj-deno`](https://github.com/yukimemi/pj-deno) — plain Deno projects (apps, CLIs, JSR libs)
+- [`pj-denops`](https://github.com/yukimemi/pj-denops) — Denops editor plugins
+- [`pj-nvim`](https://github.com/yukimemi/pj-nvim) — Neovim plugins
 - (planned) `pj-go`, `pj-bun`, ...
 
 Compose via [`pj-presets`](https://github.com/yukimemi/pj-presets):
