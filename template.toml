@@ -282,7 +282,9 @@ when = "always"
 # Setup requirement on every consumer (one-time): the Claude
 # GitHub App (github.com/apps/claude) installed on the repo, plus
 # a `CLAUDE_CODE_OAUTH_TOKEN` secret generated via
-# `claude setup-token` (Claude Pro/Max subscription).
+# `claude setup-token` (Claude Pro/Max subscription). The secret
+# half is now declared in the `[repo]` block at the end of this
+# file and applied by kata; the App install stays manual.
 [[file]]
 src = ".github/workflows/claude-review.yml.tera"
 dst = ".github/workflows/claude-review.yml"
@@ -348,3 +350,55 @@ dst = ".kata/vars.toml"
 how = "merge-toml"
 when = "always"
 paths = ["actions.claude_code_action"]
+# ---------------------------------------------------------------------
+# GitHub-side repository state.
+#
+# Not a file, so it is not a `[[file]]` entry — see yukimemi/kata#248
+# for why `[repo]` is its own section rather than a `how`. kata reads
+# the live repository, diffs against what is declared here, and
+# converges: `kata status` shows the drift, `kata apply` fixes it,
+# `kata status --all --repo` sweeps every registered project.
+#
+# Requires kata >= 0.17.0. Older kata silently no-ops on the whole
+# block — nothing in the manifest schema uses `deny_unknown_fields` —
+# so this is safe to ship ahead of everyone's upgrade, the same
+# graceful-degradation story as the `merge-toml` bracket form above.
+# ---------------------------------------------------------------------
+
+[repo.settings]
+# Merged branches were piling up in every repo, because this defaults
+# to off and nothing ever turned it on. The local half (removing the
+# worktree) is renri's job; this is the remote half.
+delete_branch_on_merge = true
+
+# The other half of the claude-review / claude workflows this layer
+# ships, and the one that is easy to forget because nothing fails until
+# a PR is opened.
+#
+# Installing the Claude GitHub App account-wide does NOT supply this.
+# Actions secrets exist at repo / environment / organization scope
+# only, and a personal account has no organization scope to inherit
+# from — so every repository needs its own. yukimemi/tsumiki spent its
+# first non-Renovate PR with `review` going red in about four seconds
+# for exactly this reason, which is what prompted the kata feature.
+#
+# `get_env` rather than `KATA_VAR_*` / `vars.*` on purpose: vars are
+# persisted into `.kata/applied.toml` and read back as a resolution
+# source, so a token routed through them would land on disk in a
+# committed file. No `default=` either — a missing variable should fail
+# loudly, since a silently unset secret is the failure mode this whole
+# entry exists to prevent.
+#
+# kata renders the value only for repositories that are actually
+# missing the secret, so a machine that does not hold the token can
+# still apply to every repository that already has it.
+# The env var is deliberately NOT named after the secret: it is the
+# name the operator's own shell profile defines, kept distinct from
+# `CLAUDE_CODE_OAUTH_TOKEN` so the value is not picked up as ambient
+# config by anything that looks for that name. Change it here only in
+# step with that profile — a mismatch fails the apply rather than
+# writing a wrong value, but the error will name the missing variable,
+# not this line.
+[[repo.secret]]
+name = "CLAUDE_CODE_OAUTH_TOKEN"
+value = '{{ get_env(name="Z_CLAUDE_CODE_OAUTH_TOKEN") }}'
