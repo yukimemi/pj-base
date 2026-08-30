@@ -60,6 +60,20 @@ how = "merge-section"
 when = "always"
 marker = { begin = "# kata:gitattributes:base:begin", end = "# kata:gitattributes:base:end" }
 
+# Common .editorconfig rules — same marker-section convention as
+# .gitignore/.gitattributes above, so `pj-rust` / future language
+# layers can append their own file-type sections and projects can
+# add their own outside the kata block. Complements `.gitattributes`
+# (commit-time LF normalization) by normalizing indentation and line
+# endings at edit time, so CRLF-vs-LF and indent-width churn between
+# contributors' editors stops before it reaches a commit.
+[[file]]
+src = ".editorconfig.base"
+dst = ".editorconfig"
+how = "merge-section"
+when = "always"
+marker = { begin = "# kata:editorconfig:base:begin", end = "# kata:editorconfig:base:end" }
+
 # APM consumer config. Tera-rendered so `name:` matches the
 # project's directory name. Static otherwise — the only reason
 # projects using these templates ship apm.yml is to vendor the renri skill.
