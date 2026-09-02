@@ -64,9 +64,13 @@ marker = { begin = "# kata:gitattributes:base:begin", end = "# kata:gitattribute
 # .gitignore/.gitattributes above, so `pj-rust` / future language
 # layers can append their own file-type sections and projects can
 # add their own outside the kata block. Complements `.gitattributes`
-# (commit-time LF normalization) by normalizing indentation and line
-# endings at edit time, so CRLF-vs-LF and indent-width churn between
-# contributors' editors stops before it reaches a commit.
+# (commit-time LF normalization) by pinning charset and line endings at
+# EDIT time, so CRLF-vs-LF churn between contributors' editors stops
+# before it reaches a commit. Scope is deliberately encoding + EOL only:
+# indentation belongs to each language's formatter, which already runs in
+# CI, and stating it twice only creates a second opinion that goes red on
+# correctly formatted code. See the header of `.editorconfig.base` for the
+# measurement that prompted narrowing it.
 [[file]]
 src = ".editorconfig.base"
 dst = ".editorconfig"
