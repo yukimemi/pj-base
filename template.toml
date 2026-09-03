@@ -205,8 +205,8 @@ how = "overwrite"
 when = "once"
 
 # ...but `extends` itself stays kata-managed via a narrow `merge-json`
-# sync, same ownership split as the `renri.toml` (`ui.show_pr`) and
-# `.kata/vars.toml` (`actions.claude_code_action`) entries above.
+# sync, same ownership split as the `renri.toml` (`ui.show_pr`) entry
+# above.
 #
 # EVERY layer ships this same entry naming ITSELF, and kata's compose
 # rule (last layer wins on file conflicts) then resolves `extends` to
@@ -286,39 +286,6 @@ dst = ".github/workflows/apm-bump.yml"
 how = "overwrite"
 when = "always"
 
-# claude-review — automatic Claude Code review on every
-# human-authored PR (replacement for the discontinued Gemini Code
-# Assist free tier). Skips review-exempt PRs per the AGENTS.md
-# "PR review cycle" rules: `chore/release-*` version bumps, the
-# `kata-apply/auto` / `apm-bump/auto` rolling branches, and
-# Renovate / Dependabot authors.
-#
-# Same `.tera` suffix story as kata-apply.yml.tera — keeps GHA
-# from auto-running the source inside pj-base while opting the
-# file into kata's Tera rendering for the action-version pins.
-#
-# Setup requirement on every consumer (one-time): the Claude
-# GitHub App (github.com/apps/claude) installed on the repo, plus
-# a `CLAUDE_CODE_OAUTH_TOKEN` secret generated via
-# `claude setup-token` (Claude Pro/Max subscription). The secret
-# half is now declared in the `[repo]` block at the end of this
-# file and applied by kata; the App install stays manual.
-[[file]]
-src = ".github/workflows/claude-review.yml.tera"
-dst = ".github/workflows/claude-review.yml"
-how = "overwrite"
-when = "always"
-
-# claude — interactive `@claude` mention responder (PR / issue
-# comments). Companion to claude-review above; fires only on
-# explicit mentions, so no skip policy needed. Same one-time
-# consumer setup (GitHub App + CLAUDE_CODE_OAUTH_TOKEN).
-[[file]]
-src = ".github/workflows/claude.yml.tera"
-dst = ".github/workflows/claude.yml"
-how = "overwrite"
-when = "always"
-
 # Action-version pins shared across kata-managed workflow
 # templates. Universal scope: this layer's `kata-apply.yml.tera`
 # uses `actions/checkout` and `peter-evans/create-pull-request`;
@@ -342,32 +309,6 @@ dst = ".kata/vars.toml"
 how = "overwrite"
 when = "once"
 
-# Back-fill of the `claude_code_action` pin for ALREADY-INITIALIZED
-# consumers. The seed entry above is `when = "once"`, so a key
-# added to vars.toml after a consumer's first apply never reaches
-# their `.kata/vars.toml` — and the claude workflow templates'
-# `claude_code_action` reference would then fail kata's strict
-# Tera render (undefined variable → `kata apply` aborts), breaking
-# every existing consumer's daily kata-apply run.
-#
-# merge-toml with a narrow `paths` list is idempotent and
-# non-clobbering: it only syncs the listed key, leaving the
-# consumer-owned (Renovate-bumped) `checkout` /
-# `create_pull_request` pins untouched — same ownership pattern as
-# the `renri.toml.base` entry's `ui.show_pr`. `when = "always"`
-# so the back-fill actually reaches consumers whose dst already
-# exists (a `when = "once"` merge entry would be gated out by
-# `once_applied = true`). Ownership consequence: this key is
-# kata-managed in consumer repos — the canonical bump happens in
-# pj-base's vars.toml and flows down on apply; consumer-side
-# Renovate scanning of this dep is disabled in `default.json` to
-# avoid a bump→revert cycle.
-[[file]]
-src = "vars.toml"
-dst = ".kata/vars.toml"
-how = "merge-toml"
-when = "always"
-paths = ["actions.claude_code_action"]
 # ---------------------------------------------------------------------
 # GitHub-side repository state.
 #
@@ -389,34 +330,3 @@ paths = ["actions.claude_code_action"]
 # worktree) is renri's job; this is the remote half.
 delete_branch_on_merge = true
 
-# The other half of the claude-review / claude workflows this layer
-# ships, and the one that is easy to forget because nothing fails until
-# a PR is opened.
-#
-# Installing the Claude GitHub App account-wide does NOT supply this.
-# Actions secrets exist at repo / environment / organization scope
-# only, and a personal account has no organization scope to inherit
-# from — so every repository needs its own. yukimemi/tsumiki spent its
-# first non-Renovate PR with `review` going red in about four seconds
-# for exactly this reason, which is what prompted the kata feature.
-#
-# `get_env` rather than `KATA_VAR_*` / `vars.*` on purpose: vars are
-# persisted into `.kata/applied.toml` and read back as a resolution
-# source, so a token routed through them would land on disk in a
-# committed file. No `default=` either — a missing variable should fail
-# loudly, since a silently unset secret is the failure mode this whole
-# entry exists to prevent.
-#
-# kata renders the value only for repositories that are actually
-# missing the secret, so a machine that does not hold the token can
-# still apply to every repository that already has it.
-# The env var is deliberately NOT named after the secret: it is the
-# name the operator's own shell profile defines, kept distinct from
-# `CLAUDE_CODE_OAUTH_TOKEN` so the value is not picked up as ambient
-# config by anything that looks for that name. Change it here only in
-# step with that profile — a mismatch fails the apply rather than
-# writing a wrong value, but the error will name the missing variable,
-# not this line.
-[[repo.secret]]
-name = "CLAUDE_CODE_OAUTH_TOKEN"
-value = '{{ get_env(name="Z_CLAUDE_CODE_OAUTH_TOKEN") }}'
