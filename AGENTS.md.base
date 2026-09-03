@@ -29,9 +29,9 @@ here so each tool's auto-load behaviour still finds something.
 ### Pre-merge review
 
 Review happens **before the pull request, on the operator's machine**,
-via [magi](https://github.com/yukimemi/magi). There are no PR-side
-review bots any more: `claude-review.yml` and `claude.yml` used to
-ship from this layer and were removed. Their scope was
+via [magi](https://github.com/yukimemi/magi). This layer no longer
+ships PR-side review bots: `claude-review.yml` and `claude.yml` were
+removed from it. Their scope was
 human-authored PRs — their own job-level `if:` already excluded
 `chore/release-*`, `kata-apply/auto`, `apm-bump/auto` and
 Renovate / Dependabot — which is exactly the set magi reviews, so
@@ -73,11 +73,23 @@ noise to ignore.
   CI turns a clean magi run into a red PR, which is the one failure
   this arrangement cannot absorb.
 - **If you did not run magi, the change was not reviewed, and nothing
-  will tell you.** CodeRabbit stays installed but does not
-  auto-review repositories under 10 stars, so treat it as absent
-  unless it posts. Do not open a PR for a hand-written change before
+  will tell you.** Do not open a PR for a hand-written change before
   `magi review` comes back clean; if you must, say so in the PR body
-  and say why.
+  and say why. What does *not* count as a substitute: a green CI run
+  (it compiles and tests, it does not review), and CodeRabbit's
+  silence.
+- **CodeRabbit stays installed and is not part of the gate.** It does
+  not auto-review repositories under 10 stars — the common case here —
+  so treat it as absent unless it posts. When it does post, its
+  findings are a real review: address them, reply **in the inline
+  thread** with an `@coderabbitai` mention (the review-comment
+  *replies* endpoint,
+  `gh api repos/<owner>/<repo>/pulls/<N>/comments/<id>/replies -f body=…`),
+  and reply even when declining — say why, because a silent skip
+  reads as overlooked. A "review limit reached" quota notice carries
+  no findings and counts as quiet; re-trigger with
+  `@coderabbitai review` when the quota refills if you want a real
+  pass.
 - **Read the report, not the exit status.** A reviewer seat that
   times out is logged as `WARN agent timed out seat=review-2` and
   then summarised as "raised 0 finding(s)" — indistinguishable from a
@@ -98,11 +110,15 @@ noise to ignore.
   is where it asks. Out of rounds leaves the PR open with a comment
   saying what still fails; `checks: unknown` never merges.
 - **Merge gate**: magi's gate green — or CI green for a change magi
-  never touched — **and** the owner's explicit approval. The
-  irreversible step stays a human decision.
-- **No review-monitoring poll loop.** It existed to wait on PR-side
-  bots, and there are none. After opening a PR, wait for CI, then
-  report the wait state to the owner; when magi is landing the PR
+  never touched — **and** every review that did post resolved (a
+  leftover `claude-review.yml`, CodeRabbit, a human) **and** the
+  owner's explicit approval. The irreversible step stays a human
+  decision.
+- **No review-monitoring poll loop for bots this layer no longer
+  ships.** The old loop existed to wait on them. Where a repo still
+  has `claude-review.yml` (see above) the old cadence still applies
+  until it is deleted; otherwise, after opening a PR wait for CI and
+  report the wait state to the owner. When magi is landing the PR
   (`land = true`), magi does the watching.
 - Bot-authored PRs (Renovate / Dependabot) need no review pass at
   all: CI green + owner approval.

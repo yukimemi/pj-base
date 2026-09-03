@@ -58,6 +58,11 @@
         ".github/workflows/apm-bump.yml"
       ],
       "enabled": false
+    },
+    {
+      "description": "Leftovers of the removed claude-review / claude workflows. This layer no longer renders them, but dropping a `[[file]]` entry does not delete a consumer's copy: a repo initialized before the removal still carries `.github/workflows/claude*.yml` and an `actions.claude_code_action` pin in `.kata/vars.toml` until it is swept by hand. Nothing reads that pin any more, so a bump of it is pure noise — a PR whose only effect is to edit a dead variable. Keep this rule until every consumer has been swept, then delete it.",
+      "matchDepNames": ["anthropics/claude-code-action"],
+      "enabled": false
     }
   ]
 }
