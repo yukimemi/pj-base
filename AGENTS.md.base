@@ -42,6 +42,17 @@ either workflow was skipped by `claude-code-action`'s
 workflow-validation check and merged with a green check and no
 review attached.
 
+**"Removed" is a statement about this template layer, not about
+every repo's current state.** Dropping a `[[file]]` entry stops kata
+from managing the rendered file — it does not delete it. A repo that
+had these workflows before this change keeps `claude-review.yml` /
+`claude.yml` (and the `CLAUDE_CODE_OAUTH_TOKEN` secret) under
+`.github/workflows/` until someone deletes them by hand, and until
+then they still fire on every human-authored PR. Check
+`.github/workflows/` before treating a PR as unreviewed-except-magi:
+if either file is still there, its comments are a real review, not
+noise to ignore.
+
 - **`magi review <branch>`** runs only the review + verification +
   gate half of magi's graph: nothing competes, no implementation, no
   judging, no vote. That is the mode for hand-written work.
