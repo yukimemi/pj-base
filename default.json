@@ -51,20 +51,12 @@
       "groupName": "github-actions"
     },
     {
-      "description": "Consumer-side kata-managed workflow files THIS layer owns — action bumps happen UPSTREAM in `kata-apply.yml.tera` / `apm-bump.yml.tera` / `claude-review.yml.tera` / `claude.yml.tera` and flow to consumers via `kata apply`, so a Renovate-driven local bump would just be reverted on the next apply. The canonical pins live in `.kata/vars.toml` (the customManager above scans there). Each language layer disables ITS OWN rendered workflows the same way — pj-rust for `ci.yml` / `auto-tag.yml`, pj-rust-cli / pj-rust-lib / pj-rust-workspace for `release.yml`, pj-denops and pj-nvim for their `ci.yml`, pj-firebase for `deploy.yml`. pj-base must NOT list those names: it is the bottom layer and cannot know which layers compose above it, and hardcoding them here blocks projects that legitimately hand-write a file of the same name (a Lume blog on the `base` preset owning its own `ci.yml`, for instance).",
+      "description": "Consumer-side kata-managed workflow files THIS layer owns — action bumps happen UPSTREAM in `kata-apply.yml.tera` / `apm-bump.yml.tera` and flow to consumers via `kata apply`, so a Renovate-driven local bump would just be reverted on the next apply. The canonical pins live in `.kata/vars.toml` (the customManager above scans there). Each language layer disables ITS OWN rendered workflows the same way — pj-rust for `ci.yml` / `auto-tag.yml`, pj-rust-cli / pj-rust-lib / pj-rust-workspace for `release.yml`, pj-denops and pj-nvim for their `ci.yml`, pj-firebase for `deploy.yml`. pj-base must NOT list those names: it is the bottom layer and cannot know which layers compose above it.",
       "matchManagers": ["github-actions"],
       "matchFileNames": [
         ".github/workflows/kata-apply.yml",
-        ".github/workflows/apm-bump.yml",
-        ".github/workflows/claude-review.yml",
-        ".github/workflows/claude.yml"
+        ".github/workflows/apm-bump.yml"
       ],
-      "enabled": false
-    },
-    {
-      "description": "The `claude_code_action` pin is kata-managed in consumer repos (back-filled into `.kata/vars.toml` via pj-base's `merge-toml, when=always` entry, unlike the consumer-owned `checkout` / `create_pull_request` pins). The canonical bump happens in pj-base's own vars.toml and flows down on the next kata apply — a consumer-side Renovate bump would be reverted by that apply, re-opened by Renovate, and so on. Disable consumer-side scanning of this one dep to break the cycle.",
-      "matchDepNames": ["anthropics/claude-code-action"],
-      "matchFileNames": [".kata/vars.toml"],
       "enabled": false
     }
   ]

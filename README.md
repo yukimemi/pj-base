@@ -34,8 +34,8 @@ Renovate config is chained, not centralised. Two rules every pj-\*
 layer follows:
 
 1. **A layer disables only the workflows it renders itself.** pj-base
-   owns `kata-apply.yml`, `apm-bump.yml`, `claude-review.yml` and
-   `claude.yml`, so only those four are listed in its `default.json`.
+   owns `kata-apply.yml` and `apm-bump.yml`, so only those two are
+   listed in its `default.json`.
    `ci.yml` belongs to pj-rust / pj-denops / pj-nvim, `release.yml` to
    the three Rust leaf layers, `deploy.yml` to pj-firebase — each
    disables its own in its own `default.json`.
