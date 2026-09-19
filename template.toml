@@ -11,21 +11,17 @@ how = "overwrite"
 when = "once"
 
 # Agent guidance — `AGENTS.md` is the agent-agnostic source of
-# truth (Codex reads it directly), `CLAUDE.md` / `GEMINI.md` are
-# thin shims that auto-load tools still find. The base layer is
-# the language-agnostic conventions block; pj-rust / pj-rust-cli
-# add their own marker-bracketed sections in the same file.
+# truth (Codex and Claude Code >=2.1.277 read it directly),
+# `GEMINI.md` is a thin shim for tools without native AGENTS.md
+# support. The base layer is the language-agnostic conventions
+# block; pj-rust / pj-rust-cli add their own marker-bracketed
+# sections in the same file.
 [[file]]
 src = "AGENTS.md.base"
 dst = "AGENTS.md"
 how = "merge-section"
 when = "always"
 marker = { begin = "<!-- kata:agents:base:begin -->", end = "<!-- kata:agents:base:end -->" }
-
-[[file]]
-src = "CLAUDE.md"
-how = "overwrite"
-when = "always"
 
 [[file]]
 src = "GEMINI.md"
