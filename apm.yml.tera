@@ -9,8 +9,9 @@ description: |
   to `#main` so `apm install --update` always pulls the latest
   renri skill.
 author: yukimemi
-# Pin targets: multi-harness auto-detection stops APM and fails
-# Renovate artifact updates.
+# Pin targets: pj-base renders both `.claude/` and `.gemini/`,
+# so APM's auto-detection sees multiple harnesses and aborts,
+# which makes Renovate's apm.lock.yaml artifact updates fail.
 targets: [claude, gemini]
 dependencies:
   apm:
