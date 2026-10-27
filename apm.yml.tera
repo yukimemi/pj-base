@@ -9,6 +9,9 @@ description: |
   to `#main` so `apm install --update` always pulls the latest
   renri skill.
 author: yukimemi
+# Pin targets: multi-harness auto-detection stops APM and fails
+# Renovate artifact updates.
+targets: [claude, gemini]
 dependencies:
   apm:
     - yukimemi/renri#main
