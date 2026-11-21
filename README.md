@@ -76,3 +76,15 @@ layer follows:
 ## License
 
 MIT.
+
+## kata-apply credentials
+
+`.github/workflows/kata-apply.yml` pushes `kata-apply/auto` with the
+`KATA_APPLY_TOKEN` secret. Because the rendered files include
+`.github/workflows/*`, that token must be allowed to update workflows:
+a classic PAT needs the `repo` and `workflow` scopes; a fine-grained
+PAT needs access to the repository with Contents, Pull requests and
+Workflows write. Without it the push is rejected with
+`refusing to allow a Personal Access Token to create or update workflow
+... without workflow scope`. Downloading the kata binary uses the
+job's own `GITHUB_TOKEN` and does not depend on this secret.
